@@ -13,7 +13,6 @@ let timeElapsed = 0;
 let debugMode = false;
 let gameRunning = false;
 
-// Load sound files
 const pickUpSound = new Audio("sounds/pickup-piece.mp3");
 const dropSound = new Audio("sounds/drop-piece.mp3");
 
@@ -213,6 +212,7 @@ function onMouseDown(e) {
       pieces.push(draggingPiece);
 
       pickUpSound.play();
+      canvas.style.cursor = "grabbing";
 
       break;
     }
@@ -221,8 +221,8 @@ function onMouseDown(e) {
 
 function onMouseMove(e) {
   if (!gameRunning) return;
+  const mousePos = getMousePos(e);
   if (draggingPiece) {
-    const mousePos = getMousePos(e);
     draggingPiece.x = Math.max(
       0,
       Math.min(mousePos.x - offsetX, canvas.width - draggingPiece.width)
@@ -232,6 +232,18 @@ function onMouseMove(e) {
       Math.min(mousePos.y - offsetY, canvas.height - draggingPiece.height)
     );
     renderPieces();
+  } else {
+    let hoveringPiece = false;
+    for (let i = pieces.length - 1; i >= 0; i--) {
+      if (isMouseOnPiece(mousePos, pieces[i])) {
+        canvas.style.cursor = "grab";
+        hoveringPiece = true;
+        break;
+      }
+    }
+    if (!hoveringPiece) {
+      canvas.style.cursor = "default";
+    }
   }
 }
 
@@ -252,6 +264,15 @@ function onMouseUp(e) {
     draggingPiece = null;
     renderPieces();
     dropSound.play();
+    canvas.style.cursor = "default";
+  }
+}
+
+function onMouseLeave(e) {
+  if (draggingPiece) {
+    draggingPiece = null;
+    renderPieces();
+    canvas.style.cursor = "default";
   }
 }
 
